@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Select Employee</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --background: #121212;
+      --surface: #1e1e1e;
+      --surface-hover: #2a2a2a;
+      --text-primary: rgba(255, 255, 255, 0.87);
+      --text-secondary: rgba(255, 255, 255, 0.6);
+      --divider: rgba(255, 255, 255, 0.12);
+      --elevation-1: 0 2px 1px -1px rgba(0,0,0,0.2), 0 1px 1px 0 rgba(0,0,0,0.14), 0 1px 3px 0 rgba(0,0,0,0.12);
+      --elevation-4: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--background);
+      padding: 24px;
+      margin: 0;
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    .app-bar {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      background: var(--surface);
+      border-radius: 4px;
+      margin-bottom: 24px;
+      box-shadow: var(--elevation-1);
+    }
+
+    .app-bar h1 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin: 0;
+      flex-grow: 1;
+    }
+
+    .employee-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .employee-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 24px 16px;
+      text-align: center;
+      box-shadow: var(--elevation-1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid var(--divider);
+    }
+
+    .employee-card:hover {
+      background: var(--surface-hover);
+      box-shadow: var(--elevation-4);
+      transform: translateY(-4px);
+    }
+
+    .employee-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 24px;
+      font-weight: 500;
+      color: white;
+    }
+
+    /* Different colors for each employee avatar */
+    .employee-avatar.color-1 { background: #FF5252; }
+    .employee-avatar.color-2 { background: #FF4081; }
+    .employee-avatar.color-3 { background: #E040FB; }
+    .employee-avatar.color-4 { background: #7C4DFF; }
+    .employee-avatar.color-5 { background: #536DFE; }
+    .employee-avatar.color-6 { background: #367474; }
+    .employee-avatar.color-7 { background: #40C4FF; }
+    .employee-avatar.color-8 { background: #18FFFF; }
+    .employee-avatar.color-9 { background: #64FFDA; }
+    .employee-avatar.color-10 { background: #69F0AE; }
+
+    .employee-name {
+      font-size: 1.125rem;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .employee-title {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin: 8px 0 0;
+    }
+
+    @media (max-width: 600px) {
+      .employee-container {
+        grid-template-columns: 1fr;
+      }
+      
+      body {
+        padding: 16px;
+      }
+    }
+
+    /* Ripple effect */
+    .ripple {
+      position: relative;
+      overflow: hidden;
+      transform: translate3d(0, 0, 0);
+    }
+
+    .ripple:after {
+      content: "";
+      display: block;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+      background-repeat: no-repeat;
+      background-position: 50%;
+      transform: scale(10, 10);
+      opacity: 0;
+      transition: transform .5s, opacity 1s;
+    }
+
+    .ripple:active:after {
+      transform: scale(0, 0);
+      opacity: .3;
+      transition: 0s;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-bar">
+    <h1>Yash Insurance Services - Task Managment System</h1>
+  </div>
+  
+  <div class="employee-container">
+    <a href="calender.html?name=Uday" class="employee-card ripple">
+      <div class="employee-avatar color-1">E</div>
+      <h3 class="employee-name">Uday</h3>
+      <p class="employee-title">IT Consultant</p>
+    </a>
+    
+    <a href="calender.html?name=Hiral" class="employee-card ripple">
+      <div class="employee-avatar color-2">E</div>
+      <h3 class="employee-name">Hiral</h3>
+      <p class="employee-title">Sr. Backoffice Executive</p>
+    </a>
+    
+    <a href="calender.html?name=Vaishali" class="employee-card ripple">
+      <div class="employee-avatar color-3">E</div>
+      <h3 class="employee-name">Vaishali</h3>
+      <p class="employee-title">Sr. Backoffice Executive</p>
+    </a>
+    
+    <a href="calender.html?name=Keval" class="employee-card ripple">
+      <div class="employee-avatar color-4">E</div>
+      <h3 class="employee-name">Keval</h3>
+      <p class="employee-title">Jr. Backoffice Executive</p>
+    </a>
+    
+    <a href="calender.html?name=Dasharath" class="employee-card ripple">
+      <div class="employee-avatar color-5">E</div>
+      <h3 class="employee-name">Dasharath</h3>
+      <p class="employee-title">Customer Support</p>
+    </a>
+
+    <a href="calender.html?name=Dharmesh" class="employee-card ripple">
+      <div class="employee-avatar color-6">E</div>
+      <h3 class="employee-name">Dharmesh</h3>
+      <p class="employee-title">Office Boy</p>
+    </a>
+  </div>
+
+  <script>
+    // Add ripple effect to all cards
+    document.querySelectorAll('.ripple').forEach(card => {
+      card.addEventListener('click', function(e) {
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        this.style.setProperty('--ripple-x', x + 'px');
+        this.style.setProperty('--ripple-y', y + 'px');
+      });
+    });
+
+    // Set the first letter of each employee's name as their avatar
+    document.querySelectorAll('.employee-card').forEach(card => {
+      const name = card.querySelector('.employee-name').textContent;
+      const firstLetter = name.charAt(0);
+      card.querySelector('.employee-avatar').textContent = firstLetter;
+    });
+  </script>
+</body>
+</html>

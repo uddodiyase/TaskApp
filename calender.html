@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Employee Task Calendar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #90caf9;
+      --primary-dark: #42a5f5;
+      --primary-light: #e3f2fd;
+      --background: #121212;
+      --surface: #1e1e1e;
+      --surface-hover: #2a2a2a;
+      --text-primary: rgba(255, 255, 255, 0.87);
+      --text-secondary: rgba(255, 255, 255, 0.6);
+      --divider: rgba(255, 255, 255, 0.12);
+      --success: #81c784;
+      --pending: #ffb74d;
+      --query: #ff8a65;
+      --elevation-1: 0 2px 1px -1px rgba(0,0,0,0.2), 0 1px 1px 0 rgba(0,0,0,0.14), 0 1px 3px 0 rgba(0,0,0,0.12);
+      --elevation-4: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
+      --elevation-8: 0 5px 5px -3px rgba(0,0,0,0.2), 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12);
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--background);
+      margin: 0;
+      padding: 24px;
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    .app-bar {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      background: var(--surface);
+      border-radius: 4px;
+      margin-bottom: 24px;
+      box-shadow: var(--elevation-1);
+    }
+
+    .app-bar h1 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin: 0;
+      flex-grow: 1;
+    }
+
+    .month-select-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .month-select {
+      padding: 12px 16px;
+      font-size: 1rem;
+      background-color: var(--surface);
+      border-radius: 4px;
+      box-shadow: var(--elevation-1);
+      border: 1px solid var(--divider);
+      color: var(--text-primary);
+      min-width: 200px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .month-select:hover {
+      background-color: var(--surface-hover);
+      box-shadow: var(--elevation-4);
+    }
+
+    .month-select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .calendar-container {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .day-header {
+      text-align: center;
+      padding: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .day {
+      padding: 16px;
+      background-color: var(--surface);
+      text-align: center;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--elevation-1);
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    .day:hover {
+      background-color: var(--surface-hover);
+      box-shadow: var(--elevation-4);
+      transform: translateY(-2px);
+    }
+
+    .day.has-task::after {
+      content: '';
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 12px;
+      height: 12px;
+      background-color: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px var(--surface);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .day.today {
+      background-color: var(--primary-dark);
+      color: rgba(0, 0, 0, 0.87);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--surface);
+      padding: 24px;
+      z-index: 1000;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      border-radius: 8px;
+      box-shadow: var(--elevation-8);
+      overflow: hidden;
+    }
+
+    .modal-content {
+      max-height: calc(80vh - 100px);
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .modal h3 {
+      margin-top: 0;
+      color: var(--primary);
+      font-size: 1.25rem;
+      margin-bottom: 16px;
+    }
+
+    .modal ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 24px 0;
+    }
+
+    .modal ul li {
+      margin-bottom: 12px;
+      padding: 12px;
+      background-color: var(--background);
+      border-radius: 4px;
+    }
+
+    .modal ul li.completed {
+      border-left: 4px solid var(--success);
+    }
+
+    .modal ul li.pending {
+      border-left: 4px solid var(--pending);
+    }
+    
+    .modal ul li.query {
+      border-left: 4px solid var(--query);
+    }
+
+    .task-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .task-icon {
+      margin-right: 12px;
+      font-size: 1.2rem;
+    }
+
+    .task-title {
+      flex-grow: 1;
+      font-weight: 500;
+    }
+
+    .task-status {
+      font-size: 0.875rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .task-status.completed {
+      background-color: rgba(129, 199, 132, 0.2);
+      color: var(--success);
+    }
+
+    .task-status.pending {
+      background-color: rgba(255, 183, 77, 0.2);
+      color: var(--pending);
+    }
+    
+    .task-status.query {
+      background-color: rgba(255, 138, 101, 0.2);
+      color: var(--query);
+    }
+
+    .task-details {
+      margin-top: 8px;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .task-detail-row {
+      display: flex;
+      margin-bottom: 4px;
+    }
+
+    .task-detail-label {
+      min-width: 120px;
+      font-weight: 500;
+      color: var(--primary-light);
+    }
+
+    .task-detail-value {
+      flex-grow: 1;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      backdrop-filter: blur(4px);
+    }
+
+    .close-btn {
+      margin-top: 16px;
+      background: var(--primary);
+      color: rgba(0, 0, 0, 0.87);
+      border: none;
+      padding: 10px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: background-color 0.3s;
+      width: 100%;
+    }
+
+    .close-btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+
+    .refresh-container {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 100;
+  padding: 0 16px; /* Add padding to prevent touching screen edges */
+}
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary);
+  color: rgba(0, 0, 0, 0.87);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 24px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: var(--elevation-4);
+  transition: all 0.3s ease;
+  width: auto; /* Allow button to shrink on mobile */
+  max-width: 100%; /* Prevent overflow */
+}
+
+.refresh-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--elevation-8);
+}
+
+/* Notification Styles */
+.refresh-notification {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  color: var(--text-primary);
+  padding: 12px 24px;
+  border-radius: 4px;
+  box-shadow: var(--elevation-4);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 101;
+  max-width: 90%; /* More responsive width */
+  text-align: center;
+  width: max-content; /* Fit content width */
+}
+
+.refresh-notification.show {
+  opacity: 1;
+}
+
+.refresh-notification.success {
+  border-left: 4px solid var(--success);
+}
+
+.refresh-notification.error {
+  border-left: 4px solid var(--pending);
+}
+        /* Back Button Styles */
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--divider);
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.back-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--primary);
+}
+
+.back-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.back-btn-text {
+  display: inline;
+}
+
+.app-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-bar h1 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: auto;
+}
+
+
+
+    @media (max-width: 768px) {
+      .calendar-container {
+        gap: 8px;
+      }
+      
+      .day {
+        padding: 12px;
+        font-size: 0.875rem;
+      }
+      
+      .modal {
+        width: 95%;
+        padding: 16px;
+      }
+      
+      .task-detail-label {
+        min-width: 100px;
+      }
+
+      .app-bar {
+        padding: 12px;
+      }
+        
+        .back-btn {
+          padding: 6px 10px;
+          gap: 4px;
+        }
+        
+        .back-btn-text {
+          display: none; /* Hide text on tablets */
+        }
+
+        .refresh-btn {
+          padding: 8px 16px;
+          font-size: 0.9rem;
+        }
+        
+        .refresh-notification {
+          bottom: 70px;
+          padding: 10px 16px;
+          font-size: 0.9rem;
+        }
+        .refresh-container {
+          bottom: 10px;
+        }
+        
+        .refresh-btn {
+          padding: 8px 12px;
+          font-size: 0.85rem;
+          gap: 6px;
+        }
+        
+        .refresh-notification {
+          bottom: 60px;
+          padding: 8px 12px;
+          font-size: 0.85rem;
+          max-width: 95%;
+        }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 16px;
+      }
+      
+      .calendar-container {
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+      }
+      
+      .day {
+        padding: 8px;
+        font-size: 0.75rem;
+      }
+      
+      .day-header {
+        font-size: 0.75rem;
+        padding: 8px;
+      }
+      
+      .task-detail-row {
+        flex-direction: column;
+      }
+      
+      .task-detail-label {
+        margin-bottom: 2px;
+      }
+
+      .app-bar {
+        padding: 8px 12px;
+      }
+ 
+      .back-btn {
+        padding: 6px;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        justify-content: center;
+      }
+      
+      .back-btn svg {
+        width: 16px;
+        height: 16px;
+        margin-right: 0;
+      }
+    }
+
+    @media (max-width: 320px) {
+  .refresh-btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+  
+  .refresh-notification {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+}
+
+  
+  </style>
+</head>
+<body>
+  <div class="app-bar">
+    <h1 id="pageTitle">Employee Task Calendar</h1>
+    <button id="backButton" class="back-btn" title="Return to Home">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      <span class="back-btn-text">Home</span>
+    </button>
+  </div>
+
+  <div class="month-select-container">
+    <select id="monthSelect" class="month-select" onchange="renderCalendar()">
+      <option value="0">January</option>
+      <option value="1">February</option>
+      <option value="2">March</option>
+      <option value="3">April</option>
+      <option value="4">May</option>
+      <option value="5">June</option>
+      <option value="6">July</option>
+      <option value="7">August</option>
+      <option value="8">September</option>
+      <option value="9">October</option>
+      <option value="10">November</option>
+      <option value="11">December</option>
+    </select>
+  </div>
+
+  <div id="calendar" class="calendar-container"></div>
+
+  <div class="overlay" id="overlay"></div>
+  <div class="modal" id="taskModal">
+    <h3 id="modalDateTitle">Tasks</h3>
+    <div class="modal-content">
+      <ul id="taskList"></ul>
+    </div>
+    <button class="close-btn" onclick="closeModal()">Close</button>
+  </div>
+
+  <!-- Add this notification div above your refresh button -->
+<div id="refreshNotification" class="refresh-notification"></div>
+<div class="refresh-container">
+  <button id="refreshButton" class="refresh-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+      <path d="M3 3v5h5"/>
+      <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+      <path d="M16 16h5v5"/>
+    </svg>
+    Refresh Data
+  </button>
+</div>
+
+  <script>
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June", 
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    const sheetId = '1asa-7B7LnzIymrOaNsUBmK32TTUm8SVqZAUDUuAXhzU';
+    let allTasks = [];
+    let currentEmployee = "";
+
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    const currentDay = currentDate.getDate();
+
+    document.getElementById('backButton').addEventListener('click', function() {
+
+      window.location.href = 'index.html'; 
+    });
+
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Set up employee change detection
+        setupEmployeeObserver();
+        
+        // Initialize with current employee
+        currentEmployee = getPageTitleName();
+        await initializeCalendar();
+    });
+
+   // Update the refresh button handler
+    document.getElementById('refreshButton').addEventListener('click', async function() {
+    const btn = this;
+    const notification = document.getElementById('refreshNotification');
+    
+    // Show refreshing message
+    notification.textContent = "Data is refreshing...";
+    notification.className = "refresh-notification show";
+    btn.disabled = true;
+    
+    try {
+        await fetchData();
+        renderCalendar();
+        
+        // Show success message
+        notification.textContent = "Data refreshed successfully!";
+        notification.className = "refresh-notification show success";
+    } catch (error) {
+        console.error('Refresh failed:', error);
+        
+        // Show error message
+        notification.textContent = "Refresh failed: " + (error.message || 'Please try again');
+        notification.className = "refresh-notification show error";
+        showErrorState(error);
+    } finally {
+        btn.disabled = false;
+        
+        // Hide notification after 3 seconds
+        setTimeout(() => {
+        notification.className = "refresh-notification";
+        }, 2000);
+    }
+    });
+
+    // Watch for URL changes to detect employee changes
+    function setupEmployeeObserver() {
+        let lastUrl = window.location.href;
+        
+        setInterval(() => {
+            const currentUrl = window.location.href;
+            if (currentUrl !== lastUrl) {
+                lastUrl = currentUrl;
+                const newEmployee = getPageTitleName();
+                if (newEmployee !== currentEmployee) {
+                    currentEmployee = newEmployee;
+                    initializeCalendar();
+                }
+            }
+        }, 500); // Check every 500ms for URL changes
+    }
+
+    async function initializeCalendar() {
+        setPageTitle();
+        document.getElementById('monthSelect').value = currentMonth;
+        renderDayHeaders();
+        
+        try {
+            await fetchData();
+            renderCalendar();
+        } catch (error) {
+            console.error('Data loading failed:', error);
+            showErrorState(error);
+        }
+    }
+
+    function showErrorState(error) {
+    const calendarContainer = document.getElementById("calendar");
+    calendarContainer.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+            <h3>Error Loading Tasks</h3>
+            <p>${error.message || 'Failed to load task data'}</p>
+            <button id="retryButton" style="
+                background: var(--primary);
+                color: black;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                cursor: pointer;
+                margin-top: 12px;
+            ">Retry</button>
+        </div>
+    `;
+    
+    document.getElementById("retryButton").addEventListener("click", retryLoading);
+}
+
+// async function retryLoading() {
+//     const retryButton = document.getElementById("retryButton");
+//     const calendarContainer = document.getElementById("calendar");
+    
+//     if (retryButton) {
+//         retryButton.disabled = true;
+//         retryButton.textContent = "Loading...";
+//     }
+
+//     try {
+//         await fetchData();
+//         // Clear the error state by re-rendering the calendar
+//         calendarContainer.innerHTML = ''; // Clear the container first
+//         renderDayHeaders(); // Re-render headers
+//         renderCalendar(); // Render the calendar
+//     } catch (error) {
+//         console.error('Retry failed:', error);
+//         if (retryButton) {
+//             retryButton.disabled = false;
+//             retryButton.textContent = "Retry";
+//         }
+//         showErrorState(error);
+//     }
+// }
+
+async function retryLoading() {
+    const retryButton = document.getElementById("retryButton");
+    const calendarContainer = document.getElementById("calendar");
+    const notification = document.getElementById("refreshNotification");
+    
+    if (retryButton) {
+        retryButton.disabled = true;
+        retryButton.textContent = "Loading...";
+    }
+
+    // Show refreshing message
+    if (notification) {
+        notification.textContent = "Refreshing data...";
+        notification.className = "refresh-notification show";
+    }
+
+    try {
+        await fetchData();
+        
+        // Only proceed if data was actually loaded
+        if (allTasks.length > 0) {
+            // Clear the error state by re-rendering the calendar
+            calendarContainer.innerHTML = ''; // Clear the container first
+            renderDayHeaders(); // Re-render headers
+            renderCalendar(); // Render the calendar
+            
+            // Show success message
+            if (notification) {
+                notification.textContent = "Data loaded successfully!";
+                notification.className = "refresh-notification show success";
+            }
+        } else {
+            throw new Error("No data received");
+        }
+    } catch (error) {
+        console.error('Retry failed:', error);
+        if (retryButton) {
+            retryButton.disabled = false;
+            retryButton.textContent = "Retry";
+        }
+        
+        // Show error message
+        if (notification) {
+            notification.textContent = "Refresh failed: " + (error.message || 'Please try again');
+            notification.className = "refresh-notification show error";
+        }
+        
+        showErrorState(error);
+    } finally {
+        // Hide notification after 2 seconds
+        if (notification) {
+            setTimeout(() => {
+                notification.className = "refresh-notification";
+            }, 2000);
+        }
+    }
+}
+    async function fetchData() {
+        try {
+            const sheetName1 = currentEmployee;
+            console.log("Fetching data for:", sheetName1);
+            
+            const proxyUrl = 'https://api.allorigins.win/get?url=';
+            const sheetUrl = encodeURIComponent(
+                `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName1}&_=${Date.now()}`
+            );
+            
+            const response = await fetch(proxyUrl + sheetUrl);
+            const json = await response.json();
+            const rawData = JSON.parse(json.contents.substr(47).slice(0, -2)); 
+
+            processData(rawData.table.rows);
+            console.log(rawData.table.rows);
+        } catch (error) {
+            console.error('Data loading failed:', error);
+            showErrorState(error);
+        }
+    }
+
+    function processData(rows) {
+        allTasks = rows.map(row => {
+            const cells = row.c.map(cell => cell?.v?.toString()?.trim() || '');
+            const date = parseDate(cells[0]);
+            
+            if (date === null) {
+                return { 
+                    date: '',
+                    task: cells[1],
+                    status: cells[2],
+                    remarks: cells[3],
+                    verifier: cells[4],
+                    verifierRemarks: cells[5],
+                    verifiedStatus: cells[6]
+                };
+            }
+            
+            return {
+                date: formatDate(date),
+                task: cells[1] || '',
+                status: cells[2] || '',
+                remarks: cells[3] || '',
+                verifier: cells[4] || '',
+                verifierRemarks: cells[5] || '',
+                verifiedStatus: cells[6] || ''
+            };
+        });
+    }
+
+    function parseDate(dateStr) {
+        const regex = /Date\((\d{4}),(\d{1,2}),(\d{1,2})\)/;
+        const match = dateStr.match(regex);
+        return match ? new Date(parseInt(match[1]), parseInt(match[2]), parseInt(match[3])) : null;
+    }
+    
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function getDaysInMonth(month, year) {
+        return new Date(year, month + 1, 0).getDate();
+    }
+
+    function renderDayHeaders() {
+        const calendarContainer = document.getElementById("calendar");
+        calendarContainer.querySelectorAll('.day-header').forEach(el => el.remove());
+        
+        dayNames.forEach(day => {
+            const dayHeader = document.createElement("div");
+            dayHeader.className = "day-header";
+            dayHeader.textContent = day;
+            calendarContainer.appendChild(dayHeader);
+        });
+    }
+
+    function renderCalendar() {
+        const calendarContainer = document.getElementById("calendar");
+        const monthSelect = document.getElementById("monthSelect");
+        const selectedMonth = parseInt(monthSelect.value);
+        const year = currentYear;
+
+        // Clear existing day cells
+        calendarContainer.querySelectorAll('.day').forEach(el => el.remove());
+
+        const daysInMonth = getDaysInMonth(selectedMonth, year);
+        const firstDay = new Date(year, selectedMonth, 1).getDay();
+
+        // Add empty cells for days before the first day
+        for (let i = 0; i < firstDay; i++) {
+            const emptyCell = document.createElement("div");
+            emptyCell.className = "day empty";
+            calendarContainer.appendChild(emptyCell);
+        }
+
+        // Add cells for each day
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayStr = `${year}-${(selectedMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+            const hasTasks = allTasks.some(t => t.date === dayStr);
+            const isToday = (year === currentYear && selectedMonth === currentMonth && day === currentDay);
+
+            const dayDiv = document.createElement("div");
+            dayDiv.className = `day ${hasTasks ? "has-task" : ""} ${isToday ? "today" : ""}`;
+            dayDiv.textContent = day;
+            dayDiv.onclick = () => showTasks(dayStr, day, selectedMonth, year);
+            
+            calendarContainer.appendChild(dayDiv);
+        }
+    }
+
+    function showTasks(date, day, month, year) {
+        const modal = document.getElementById("taskModal");
+        const taskList = document.getElementById("taskList");
+        const modalDateTitle = document.getElementById("modalDateTitle");
+
+        const dateObj = new Date(year, month, day);
+        const formattedDate = dateObj.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            month: 'long', 
+            day: 'numeric', 
+            year: 'numeric' 
+        });
+        
+        modalDateTitle.textContent = `Tasks for ${formattedDate}`;
+
+        const tasks = allTasks.filter(t => t.date === date);
+        
+        if (tasks.length === 0) {
+            taskList.innerHTML = '<li class="empty">No tasks scheduled for this day</li>';
+        } else {
+            taskList.innerHTML = tasks.map(task => `
+                <li class="${task.status.toLowerCase()}">
+                    <div class="task-header">
+                        <span class="task-icon">${getStatusIcon(task.status)}</span>
+                        <span class="task-title">${task.task}</span>
+                        <span class="task-status ${task.status.toLowerCase()}">${task.status}</span>
+                    </div>
+                    <div class="task-details">
+                        ${task.remarks ? `
+                        <div class="task-detail-row">
+                            <span class="task-detail-label">Remarks:</span>
+                            <span class="task-detail-value">${task.remarks}</span>
+                        </div>` : ''}
+                        
+                        ${task.verifier ? `
+                        <div class="task-detail-row">
+                            <span class="task-detail-label">Verifier:</span>
+                            <span class="task-detail-value">${task.verifier}</span>
+                        </div>` : ''}
+                        
+                        ${task.verifierRemarks ? `
+                        <div class="task-detail-row">
+                            <span class="task-detail-label">Verifier Remarks:</span>
+                            <span class="task-detail-value">${task.verifierRemarks}</span>
+                        </div>` : ''}
+                        
+                        ${task.verifiedStatus ? `
+                        <div class="task-detail-row">
+                            <span class="task-detail-label">Verified Status:</span>
+                            <span class="task-detail-value">
+                                <span class="task-status ${task.verifiedStatus.toLowerCase()}">
+                                    ${task.verifiedStatus}
+                                </span>
+                            </span>
+                        </div>` : ''}
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        modal.style.display = "block";
+        document.getElementById("overlay").style.display = "block";
+    }
+
+    function getStatusIcon(status) {
+        switch(status.toLowerCase()) {
+            case 'completed': return '✅';
+            case 'pending': return '📝';
+            case 'query': return '❓';
+            default: return '📌';
+        }
+    }
+
+    function closeModal() {
+        document.getElementById("taskModal").style.display = "none";
+        document.getElementById("overlay").style.display = "none";
+    }
+
+    function setPageTitle() {
+        document.getElementById("pageTitle").textContent = `${currentEmployee}'s Task Calendar`;
+    }
+
+    function getPageTitleName() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get("name") || "Employee";
+    }
+  </script>
+</body>
+</html>
