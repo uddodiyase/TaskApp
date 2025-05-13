@@ -17,6 +17,18 @@
       --elevation-4: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
     }
 
+    /* Light mode variables */
+    [data-theme="light"] {
+      --background: #f5f5f5;
+      --surface: #ffffff;
+      --surface-hover: #f1f1f1;
+      --text-primary: rgba(0, 0, 0, 0.87);
+      --text-secondary: rgba(0, 0, 0, 0.6);
+      --divider: rgba(0, 0, 0, 0.12);
+      --elevation-1: 0 2px 1px -1px rgba(0,0,0,0.1), 0 1px 1px 0 rgba(0,0,0,0.07), 0 1px 3px 0 rgba(0,0,0,0.06);
+      --elevation-4: 0 2px 4px -1px rgba(0,0,0,0.1), 0 4px 5px 0 rgba(0,0,0,0.07), 0 1px 10px 0 rgba(0,0,0,0.06);
+    }
+
     body {
       font-family: 'Roboto', sans-serif;
       background: var(--background);
@@ -24,6 +36,7 @@
       margin: 0;
       color: var(--text-primary);
       min-height: 100vh;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     .app-bar {
@@ -34,6 +47,7 @@
       border-radius: 4px;
       margin-bottom: 24px;
       box-shadow: var(--elevation-1);
+      transition: background-color 0.3s ease;
     }
 
     .app-bar h1 {
@@ -41,6 +55,24 @@
       font-weight: 500;
       margin: 0;
       flex-grow: 1;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      background-color: var(--divider);
     }
 
     .employee-container {
@@ -154,6 +186,10 @@
 <body>
   <div class="app-bar">
     <h1>Yash Insurance Services - Task Managment System</h1>
+    <button class="theme-toggle" id="themeToggle">
+      <span id="themeIcon">🌙</span>
+      <span id="themeText">Dark Mode</span>
+    </button>
   </div>
   
   <div class="employee-container">
@@ -195,6 +231,44 @@
   </div>
 
   <script>
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+    
+    // Unique localStorage key for theme preference
+    const THEME_STORAGE_KEY = 'TaskApp-data-theme';
+    
+    // Check for saved theme preference or use preferred color scheme
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || 
+                     (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    
+    // Apply the saved theme
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeButton(savedTheme);
+    
+    // Toggle theme on button click
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      updateThemeButton(newTheme);
+      
+      // Store the theme preference in localStorage with unique key
+      localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+    });
+    
+    function updateThemeButton(theme) {
+      if (theme === 'dark') {
+        themeIcon.textContent = '☀️';
+        themeText.textContent = 'Light Mode';
+      } else {
+        themeIcon.textContent = '🌙';
+        themeText.textContent = 'Dark Mode';
+      }
+    }
+    
     // Add ripple effect to all cards
     document.querySelectorAll('.ripple').forEach(card => {
       card.addEventListener('click', function(e) {

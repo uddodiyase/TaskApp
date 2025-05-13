@@ -27,6 +27,25 @@
       --elevation-8: 0 5px 5px -3px rgba(0,0,0,0.2), 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12);
     }
 
+    /* Light mode variables */
+    [data-theme="light"] {
+      --primary: #1976d2;
+      --primary-dark: #1565c0;
+      --primary-light: #302d2d;
+      --background: #f5f5f5;
+      --surface: #ffffff;
+      --surface-hover: #f1f1f1;
+      --text-primary: rgba(0, 0, 0, 0.87);
+      --text-secondary: rgba(0, 0, 0, 0.6);
+      --divider: rgba(0, 0, 0, 0.12);
+      --success: #2e7d32;
+      --pending: #ff8f00;
+      --query: #d84315;
+      --elevation-1: 0 2px 1px -1px rgba(0,0,0,0.1), 0 1px 1px 0 rgba(0,0,0,0.07), 0 1px 3px 0 rgba(0,0,0,0.06);
+      --elevation-4: 0 2px 4px -1px rgba(0,0,0,0.1), 0 4px 5px 0 rgba(0,0,0,0.07), 0 1px 10px 0 rgba(0,0,0,0.06);
+      --elevation-8: 0 5px 5px -3px rgba(0,0,0,0.1), 0 8px 10px 1px rgba(0,0,0,0.07), 0 3px 14px 2px rgba(0,0,0,0.06);
+    }
+
     body {
       font-family: 'Roboto', sans-serif;
       background: var(--background);
@@ -34,6 +53,7 @@
       padding: 24px;
       color: var(--text-primary);
       min-height: 100vh;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     .app-bar {
@@ -44,6 +64,7 @@
       border-radius: 4px;
       margin-bottom: 24px;
       box-shadow: var(--elevation-1);
+      transition: background-color 0.3s ease;
     }
 
     .app-bar h1 {
@@ -51,6 +72,25 @@
       font-weight: 500;
       margin: 0;
       flex-grow: 1;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+      margin-left: 16px;
+    }
+
+    .theme-toggle:hover {
+      background-color: var(--divider);
     }
 
     .month-select-container {
@@ -305,116 +345,115 @@
     }
 
     .refresh-container {
-  position: fixed;
-  bottom: 20px;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  z-index: 100;
-  padding: 0 16px; /* Add padding to prevent touching screen edges */
-}
+      position: fixed;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      z-index: 100;
+      padding: 0 16px;
+    }
 
-.refresh-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--primary);
-  color: rgba(0, 0, 0, 0.87);
-  border: none;
-  padding: 10px 20px;
-  border-radius: 24px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
-  box-shadow: var(--elevation-4);
-  transition: all 0.3s ease;
-  width: auto; /* Allow button to shrink on mobile */
-  max-width: 100%; /* Prevent overflow */
-}
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary);
+      color: rgba(0, 0, 0, 0.87);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 24px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      box-shadow: var(--elevation-4);
+      transition: all 0.3s ease;
+      width: auto;
+      max-width: 100%;
+    }
 
-.refresh-btn:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
-  box-shadow: var(--elevation-8);
-}
+    .refresh-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--elevation-8);
+    }
 
-/* Notification Styles */
-.refresh-notification {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--surface);
-  color: var(--text-primary);
-  padding: 12px 24px;
-  border-radius: 4px;
-  box-shadow: var(--elevation-4);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 101;
-  max-width: 90%; /* More responsive width */
-  text-align: center;
-  width: max-content; /* Fit content width */
-}
+    /* Notification Styles */
+    .refresh-notification {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      color: var(--text-primary);
+      padding: 12px 24px;
+      border-radius: 4px;
+      box-shadow: var(--elevation-4);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 101;
+      max-width: 90%;
+      text-align: center;
+      width: max-content;
+    }
 
-.refresh-notification.show {
-  opacity: 1;
-}
+    .refresh-notification.show {
+      opacity: 1;
+    }
 
-.refresh-notification.success {
-  border-left: 4px solid var(--success);
-}
+    .refresh-notification.success {
+      border-left: 4px solid var(--success);
+    }
 
-.refresh-notification.error {
-  border-left: 4px solid var(--pending);
-}
-        /* Back Button Styles */
-.back-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: transparent;
-  color: var(--text-primary);
-  border: 1px solid var(--divider);
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
+    .refresh-notification.error {
+      border-left: 4px solid var(--pending);
+    }
+    
+    /* Back Button Styles */
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--divider);
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
 
-.back-btn:hover {
-  background: var(--surface-hover);
-  border-color: var(--primary);
-}
+    .back-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--primary);
+    }
 
-.back-btn svg {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
+    .back-btn svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
 
-.back-btn-text {
-  display: inline;
-}
+    .back-btn-text {
+      display: inline;
+    }
 
-.app-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-}
+    .app-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
 
-.app-bar h1 {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-right: auto;
-}
-
-
+    .app-bar h1 {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: auto;
+    }
 
     @media (max-width: 768px) {
       .calendar-container {
@@ -439,41 +478,42 @@
         padding: 12px;
       }
         
-        .back-btn {
-          padding: 6px 10px;
-          gap: 4px;
-        }
+      .back-btn {
+        padding: 6px 10px;
+        gap: 4px;
+      }
         
-        .back-btn-text {
-          display: none; /* Hide text on tablets */
-        }
+      .back-btn-text {
+        display: none;
+      }
 
-        .refresh-btn {
-          padding: 8px 16px;
-          font-size: 0.9rem;
-        }
+      .refresh-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
         
-        .refresh-notification {
-          bottom: 70px;
-          padding: 10px 16px;
-          font-size: 0.9rem;
-        }
-        .refresh-container {
-          bottom: 10px;
-        }
+      .refresh-notification {
+        bottom: 70px;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+      }
+      
+      .refresh-container {
+        bottom: 10px;
+      }
         
-        .refresh-btn {
-          padding: 8px 12px;
-          font-size: 0.85rem;
-          gap: 6px;
-        }
+      .refresh-btn {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        gap: 6px;
+      }
         
-        .refresh-notification {
-          bottom: 60px;
-          padding: 8px 12px;
-          font-size: 0.85rem;
-          max-width: 95%;
-        }
+      .refresh-notification {
+        bottom: 60px;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        max-width: 95%;
+      }
     }
 
     @media (max-width: 480px) {
@@ -524,29 +564,33 @@
     }
 
     @media (max-width: 320px) {
-  .refresh-btn {
-    padding: 6px 10px;
-    font-size: 0.8rem;
-  }
-  
-  .refresh-notification {
-    font-size: 0.8rem;
-    padding: 6px 10px;
-  }
-}
-
-  
+      .refresh-btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+      
+      .refresh-notification {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="app-bar">
     <h1 id="pageTitle">Employee Task Calendar</h1>
-    <button id="backButton" class="back-btn" title="Return to Home">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 12H5M12 19l-7-7 7-7"/>
-      </svg>
-      <span class="back-btn-text">Home</span>
-    </button>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <button class="theme-toggle" id="themeToggle">
+        <span id="themeIcon">🌙</span>
+        <span id="themeText">Dark Mode</span>
+      </button>
+      <button id="backButton" class="back-btn" title="Return to Home">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        <span class="back-btn-text">Home</span>
+      </button>
+    </div>
   </div>
 
   <div class="month-select-container">
@@ -577,21 +621,58 @@
     <button class="close-btn" onclick="closeModal()">Close</button>
   </div>
 
-  <!-- Add this notification div above your refresh button -->
-<div id="refreshNotification" class="refresh-notification"></div>
-<div class="refresh-container">
-  <button id="refreshButton" class="refresh-btn">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-      <path d="M3 3v5h5"/>
-      <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
-      <path d="M16 16h5v5"/>
-    </svg>
-    Refresh Data
-  </button>
-</div>
+  <div id="refreshNotification" class="refresh-notification"></div>
+  <div class="refresh-container">
+    <button id="refreshButton" class="refresh-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+        <path d="M3 3v5h5"/>
+        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+        <path d="M16 16h5v5"/>
+      </svg>
+      Refresh Data
+    </button>
+  </div>
 
   <script>
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+    
+    // Unique localStorage key for theme preference (same as index page)
+    const THEME_STORAGE_KEY = 'TaskApp-data-theme';
+    
+    // Check for saved theme preference or use preferred color scheme
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || 
+                     (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    
+    // Apply the saved theme
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeButton(savedTheme);
+    
+    // Toggle theme on button click
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      updateThemeButton(newTheme);
+      
+      // Store the theme preference in localStorage with unique key
+      localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+    });
+    
+    function updateThemeButton(theme) {
+      if (theme === 'dark') {
+        themeIcon.textContent = '☀️';
+        themeText.textContent = 'Light Mode';
+      } else {
+        themeIcon.textContent = '🌙';
+        themeText.textContent = 'Dark Mode';
+      }
+    }
+
     const monthNames = [
       "January", "February", "March", "April", "May", "June", 
       "July", "August", "September", "October", "November", "December"
@@ -609,10 +690,8 @@
     const currentDay = currentDate.getDate();
 
     document.getElementById('backButton').addEventListener('click', function() {
-
       window.location.href = 'index.html'; 
     });
-
 
     // Initialize the application
     document.addEventListener('DOMContentLoaded', async function() {
@@ -624,38 +703,38 @@
         await initializeCalendar();
     });
 
-   // Update the refresh button handler
+    // Update the refresh button handler
     document.getElementById('refreshButton').addEventListener('click', async function() {
-    const btn = this;
-    const notification = document.getElementById('refreshNotification');
-    
-    // Show refreshing message
-    notification.textContent = "Data is refreshing...";
-    notification.className = "refresh-notification show";
-    btn.disabled = true;
-    
-    try {
-        await fetchData();
-        renderCalendar();
-        
-        // Show success message
-        notification.textContent = "Data refreshed successfully!";
-        notification.className = "refresh-notification show success";
-    } catch (error) {
-        console.error('Refresh failed:', error);
-        
-        // Show error message
-        notification.textContent = "Refresh failed: " + (error.message || 'Please try again');
-        notification.className = "refresh-notification show error";
-        showErrorState(error);
-    } finally {
-        btn.disabled = false;
-        
-        // Hide notification after 3 seconds
-        setTimeout(() => {
-        notification.className = "refresh-notification";
-        }, 2000);
-    }
+      const btn = this;
+      const notification = document.getElementById('refreshNotification');
+      
+      // Show refreshing message
+      notification.textContent = "Data is refreshing...";
+      notification.className = "refresh-notification show";
+      btn.disabled = true;
+      
+      try {
+          await fetchData();
+          renderCalendar();
+          
+          // Show success message
+          notification.textContent = "Data refreshed successfully!";
+          notification.className = "refresh-notification show success";
+      } catch (error) {
+          console.error('Refresh failed:', error);
+          
+          // Show error message
+          notification.textContent = "Refresh failed: " + (error.message || 'Please try again');
+          notification.className = "refresh-notification show error";
+          showErrorState(error);
+      } finally {
+          btn.disabled = false;
+          
+          // Hide notification after 3 seconds
+          setTimeout(() => {
+          notification.className = "refresh-notification";
+          }, 2000);
+      }
     });
 
     // Watch for URL changes to detect employee changes
@@ -690,108 +769,84 @@
     }
 
     function showErrorState(error) {
-    const calendarContainer = document.getElementById("calendar");
-    calendarContainer.innerHTML = `
-        <div class="empty-state" style="grid-column: 1 / -1;">
-            <h3>Error Loading Tasks</h3>
-            <p>${error.message || 'Failed to load task data'}</p>
-            <button id="retryButton" style="
-                background: var(--primary);
-                color: black;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 4px;
-                cursor: pointer;
-                margin-top: 12px;
-            ">Retry</button>
-        </div>
-    `;
-    
-    document.getElementById("retryButton").addEventListener("click", retryLoading);
-}
-
-// async function retryLoading() {
-//     const retryButton = document.getElementById("retryButton");
-//     const calendarContainer = document.getElementById("calendar");
-    
-//     if (retryButton) {
-//         retryButton.disabled = true;
-//         retryButton.textContent = "Loading...";
-//     }
-
-//     try {
-//         await fetchData();
-//         // Clear the error state by re-rendering the calendar
-//         calendarContainer.innerHTML = ''; // Clear the container first
-//         renderDayHeaders(); // Re-render headers
-//         renderCalendar(); // Render the calendar
-//     } catch (error) {
-//         console.error('Retry failed:', error);
-//         if (retryButton) {
-//             retryButton.disabled = false;
-//             retryButton.textContent = "Retry";
-//         }
-//         showErrorState(error);
-//     }
-// }
-
-async function retryLoading() {
-    const retryButton = document.getElementById("retryButton");
-    const calendarContainer = document.getElementById("calendar");
-    const notification = document.getElementById("refreshNotification");
-    
-    if (retryButton) {
-        retryButton.disabled = true;
-        retryButton.textContent = "Loading...";
+      const calendarContainer = document.getElementById("calendar");
+      calendarContainer.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+              <h3>Error Loading Tasks</h3>
+              <p>${error.message || 'Failed to load task data'}</p>
+              <button id="retryButton" style="
+                  background: var(--primary);
+                  color: black;
+                  border: none;
+                  padding: 8px 16px;
+                  border-radius: 4px;
+                  cursor: pointer;
+                  margin-top: 12px;
+              ">Retry</button>
+          </div>
+      `;
+      
+      document.getElementById("retryButton").addEventListener("click", retryLoading);
     }
 
-    // Show refreshing message
-    if (notification) {
-        notification.textContent = "Refreshing data...";
-        notification.className = "refresh-notification show";
+    async function retryLoading() {
+      const retryButton = document.getElementById("retryButton");
+      const calendarContainer = document.getElementById("calendar");
+      const notification = document.getElementById("refreshNotification");
+      
+      if (retryButton) {
+          retryButton.disabled = true;
+          retryButton.textContent = "Loading...";
+      }
+
+      // Show refreshing message
+      if (notification) {
+          notification.textContent = "Refreshing data...";
+          notification.className = "refresh-notification show";
+      }
+
+      try {
+          await fetchData();
+          
+          // Only proceed if data was actually loaded
+          if (allTasks.length > 0) {
+              // Clear the error state by re-rendering the calendar
+              calendarContainer.innerHTML = ''; // Clear the container first
+              renderDayHeaders(); // Re-render headers
+              renderCalendar(); // Render the calendar
+              
+              // Show success message
+              if (notification) {
+                  notification.textContent = "Data loaded successfully!";
+                  notification.className = "refresh-notification show success";
+              }
+          } else {
+              throw new Error("No data received");
+          }
+      } catch (error) {
+          console.error('Retry failed:', error);
+          if (retryButton) {
+              retryButton.disabled = false;
+              retryButton.textContent = "Retry";
+          }
+          
+          // Show error message
+          if (notification) {
+              notification.textContent = "Refresh failed: " + (error.message || 'Please try again');
+              notification.className = "refresh-notification show error";
+          }
+          
+          showErrorState(error);
+      } finally {
+          // Hide notification after 2 seconds
+          if (notification) {
+              setTimeout(() => {
+                  notification.className = "refresh-notification";
+              }, 2000);
+          }
+      }
     }
 
-    try {
-        await fetchData();
-        
-        // Only proceed if data was actually loaded
-        if (allTasks.length > 0) {
-            // Clear the error state by re-rendering the calendar
-            calendarContainer.innerHTML = ''; // Clear the container first
-            renderDayHeaders(); // Re-render headers
-            renderCalendar(); // Render the calendar
-            
-            // Show success message
-            if (notification) {
-                notification.textContent = "Data loaded successfully!";
-                notification.className = "refresh-notification show success";
-            }
-        } else {
-            throw new Error("No data received");
-        }
-    } catch (error) {
-        console.error('Retry failed:', error);
-        if (retryButton) {
-            retryButton.disabled = false;
-            retryButton.textContent = "Retry";
-        }
-        
-        // Show error message
-        if (notification) {
-            notification.textContent = "Refresh failed: " + (error.message || 'Please try again');
-            notification.className = "refresh-notification show error";
-        }
-        
-        showErrorState(error);
-    } finally {
-        // Hide notification after 2 seconds
-        if (notification) {
-            setTimeout(() => {
-                notification.className = "refresh-notification";
-            }, 2000);
-        }
-    }
-}
     async function fetchData() {
         try {
             const sheetName1 = currentEmployee;
