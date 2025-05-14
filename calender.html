@@ -847,57 +847,56 @@
       }
     }
 
-    async function fetchData() {
-        try {
-            const sheetName1 = currentEmployee;
-            console.log("Fetching data for:", sheetName1);
-            
-            const proxyUrl = 'https://api.allorigins.win/get?url=';
-            const sheetUrl = encodeURIComponent(
-                `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName1}&_=${Date.now()}`
-            );
-            
-            const response = await fetch(proxyUrl + sheetUrl);
-            const json = await response.json();
-            const rawData = JSON.parse(json.contents.substr(47).slice(0, -2)); 
-
-            processData(rawData.table.rows);
-            console.log(rawData.table.rows);
-        } catch (error) {
-            console.error('Data loading failed:', error);
-            showErrorState(error);
-        }
+   async function fetchData() {
+    try {
+        const sheetName1 = currentEmployee;
+        console.log("Fetching data for:", sheetName1);
+      
+        const sheetUrl = `https://opensheet.elk.sh/1asa-7B7LnzIymrOaNsUBmK32TTUm8SVqZAUDUuAXhzU/${sheetName1}`;
+        
+        const response = await fetch(sheetUrl);
+        const json = await response.json();
+        
+        // Process the data based on the structure you provided
+        processData(json); // Assuming the response is the array you showed
+        
+    } catch (error) {
+        console.error('Data loading failed:', error);
+        showErrorState(error);
     }
+}
+function processData(data) {
+    allTasks = data.map((item, index) => {
+        const values = Object.values(item);
+        return {
+            date: values[0] || '',  // Date
+            task: values[1] || '',  // Task Name
+            status: values[2] || '',  // Task Status
+            remarks: values[3] || '',  // Task Remarks
+            verifier: values[4] || '',  // Task Verifier
+            verifierRemarks: values[5] || '',  // Verifier Remarks
+            verifiedStatus: values[6] || ''
+        };
+    });
+    
+    //console.log('Processed tasks with column numbers:', allTasks);
+}
 
-    function processData(rows) {
-        allTasks = rows.map(row => {
-            const cells = row.c.map(cell => cell?.v?.toString()?.trim() || '');
-            const date = parseDate(cells[0]);
-            
-            if (date === null) {
-                return { 
-                    date: '',
-                    task: cells[1],
-                    status: cells[2],
-                    remarks: cells[3],
-                    verifier: cells[4],
-                    verifierRemarks: cells[5],
-                    verifiedStatus: cells[6]
-                };
-            }
-            
-            return {
-                date: formatDate(date),
-                task: cells[1] || '',
-                status: cells[2] || '',
-                remarks: cells[3] || '',
-                verifier: cells[4] || '',
-                verifierRemarks: cells[5] || '',
-                verifiedStatus: cells[6] || ''
-            };
-        });
-    }
-
+// function processData(data) {
+//     allTasks = data.map(item => {
+//         return {
+//             date: item['Date(YYYY-MM-DD)'] || '',
+//             task: item['Task Name'] || '',
+//             status: item['Task Status'] || '',
+//             remarks: item['Task Remarks'] || '',
+//             verifier: item['Task Verifier'] || '',
+//             verifierRemarks: item['Verifier Remarks'] || '',
+//             verifiedStatus: item['Verified Status'] || ''
+//         };
+//     });
+    
+//     console.log('Processed tasks:', allTasks);
+// }
     function parseDate(dateStr) {
         const regex = /Date\((\d{4}),(\d{1,2}),(\d{1,2})\)/;
         const match = dateStr.match(regex);
