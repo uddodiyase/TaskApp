@@ -455,7 +455,76 @@
       margin-right: auto;
     }
 
+    /* Add these to your existing styles */
+.day.sunday {
+  color: #ff6b6b;
+  position: relative;
+}
+
+.day.sunday::before {
+  content: 'S';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  color: #ff6b6b;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.day.leave {
+  color: #ff6b6b;
+  position: relative;
+}
+
+.day.leave::before {
+  content: 'L';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  color: #ff6b6b;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.day.holiday {
+  color: #ff6b6b;
+  position: relative;
+}
+
+.day.holiday::before {
+  content: 'H';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  color: #ff6b6b;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+
     @media (max-width: 768px) {
+
+      .day.sunday::before,
+      .day.holiday::before,
+  .day.leave::before {
+    top: 2px;
+    left: 2px;
+    font-size: 0.9em;
+  }
+
+      .day.has-task::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 6px;
+      height: 6px;
+      background-color: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px var(--surface);
+      animation: pulse 2s infinite;
+    }
+
       .calendar-container {
         gap: 8px;
       }
@@ -517,6 +586,16 @@
     }
 
     @media (max-width: 480px) {
+
+      .day.sunday::before,
+      .day.holiday::before,
+  .day.leave::before {
+    top: 2px;
+    left: 2px;
+    font-size: 0.9em;
+  }
+
+  
       body {
         padding: 16px;
       }
@@ -681,6 +760,7 @@
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     const sheetId = '1asa-7B7LnzIymrOaNsUBmK32TTUm8SVqZAUDUuAXhzU';
+    const apiKey = 'AIzaSyAXNaQ1d3jhixPTvplBoFNVlEqhzy_vjvY';
     let allTasks = [];
     let currentEmployee = "";
 
@@ -847,39 +927,42 @@
       }
     }
 
-   async function fetchData() {
+  async function fetchData() {
     try {
         const sheetName1 = currentEmployee;
         console.log("Fetching data for:", sheetName1);
       
-        const sheetUrl = `https://opensheet.elk.sh/1asa-7B7LnzIymrOaNsUBmK32TTUm8SVqZAUDUuAXhzU/${sheetName1}`;
-        
+        const sheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName1}?key=${apiKey}`;
+
         const response = await fetch(sheetUrl);
         const json = await response.json();
         
-        // Process the data based on the structure you provided
-        processData(json); // Assuming the response is the array you showed
-        
+        // Process the data based on the actual structure
+        processData(json);
+       // console.log(json);
     } catch (error) {
         console.error('Data loading failed:', error);
         showErrorState(error);
     }
 }
+
 function processData(data) {
-    allTasks = data.map((item, index) => {
-        const values = Object.values(item);
+    // Skip the header row (index 0) if it exists
+    const rows = data.values.slice(1); // Remove this if you don't have headers
+    
+    allTasks = rows.map(row => {
         return {
-            date: values[0] || '',  // Date
-            task: values[1] || '',  // Task Name
-            status: values[2] || '',  // Task Status
-            remarks: values[3] || '',  // Task Remarks
-            verifier: values[4] || '',  // Task Verifier
-            verifierRemarks: values[5] || '',  // Verifier Remarks
-            verifiedStatus: values[6] || ''
+            date: row[0] || '',       // First column - Date
+            task: row[1] || '',       // Second column - Task Name
+            status: row[2] || '',    // Third column - Task Status
+            remarks: row[3] || '',   // Fourth column - Task Remarks
+            verifier: row[4] || '',   // Fifth column - Task Verifier
+            verifierRemarks: row[5] || '', // Sixth column - Verifier Remarks
+            verifiedStatus: row[6] || ''   // Seventh column - Verified Status
         };
     });
     
-    //console.log('Processed tasks with column numbers:', allTasks);
+    console.log('Processed tasks:', allTasks);
 }
 
 // function processData(data) {
@@ -902,13 +985,13 @@ function processData(data) {
         const match = dateStr.match(regex);
         return match ? new Date(parseInt(match[1]), parseInt(match[2]), parseInt(match[3])) : null;
     }
-    
-    function formatDate(date) {
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
+
+  function formatDate(date) {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
 
     function getDaysInMonth(month, year) {
         return new Date(year, month + 1, 0).getDate();
@@ -926,104 +1009,120 @@ function processData(data) {
         });
     }
 
-    function renderCalendar() {
-        const calendarContainer = document.getElementById("calendar");
-        const monthSelect = document.getElementById("monthSelect");
-        const selectedMonth = parseInt(monthSelect.value);
-        const year = currentYear;
+function renderCalendar() {
+    const calendarContainer = document.getElementById("calendar");
+    const monthSelect = document.getElementById("monthSelect");
+    const selectedMonth = parseInt(monthSelect.value);
+    const year = currentYear;
 
-        // Clear existing day cells
-        calendarContainer.querySelectorAll('.day').forEach(el => el.remove());
+    // Clear existing day cells
+    calendarContainer.querySelectorAll('.day').forEach(el => el.remove());
 
-        const daysInMonth = getDaysInMonth(selectedMonth, year);
-        const firstDay = new Date(year, selectedMonth, 1).getDay();
+    const daysInMonth = getDaysInMonth(selectedMonth, year);
+    const firstDay = new Date(year, selectedMonth, 1).getDay();
 
-        // Add empty cells for days before the first day
-        for (let i = 0; i < firstDay; i++) {
-            const emptyCell = document.createElement("div");
-            emptyCell.className = "day empty";
-            calendarContainer.appendChild(emptyCell);
-        }
-
-        // Add cells for each day
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dayStr = `${year}-${(selectedMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-            const hasTasks = allTasks.some(t => t.date === dayStr);
-            const isToday = (year === currentYear && selectedMonth === currentMonth && day === currentDay);
-
-            const dayDiv = document.createElement("div");
-            dayDiv.className = `day ${hasTasks ? "has-task" : ""} ${isToday ? "today" : ""}`;
-            dayDiv.textContent = day;
-            dayDiv.onclick = () => showTasks(dayStr, day, selectedMonth, year);
-            
-            calendarContainer.appendChild(dayDiv);
-        }
+    // Add empty cells for days before the first day
+    for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement("div");
+        emptyCell.className = "day empty";
+        calendarContainer.appendChild(emptyCell);
     }
 
-    function showTasks(date, day, month, year) {
-        const modal = document.getElementById("taskModal");
-        const taskList = document.getElementById("taskList");
-        const modalDateTitle = document.getElementById("modalDateTitle");
-
-        const dateObj = new Date(year, month, day);
-        const formattedDate = dateObj.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            month: 'long', 
-            day: 'numeric', 
-            year: 'numeric' 
-        });
+    // Add cells for each day
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateObj = new Date(year, selectedMonth, day);
+        const dayStr = formatDate(dateObj);
+        const dayOfWeek = dateObj.getDay(); // 0 = Sunday, 1 = Monday, etc.
         
-        modalDateTitle.textContent = `Tasks for ${formattedDate}`;
-
-        const tasks = allTasks.filter(t => t.date === date);
+        // Get all tasks for this day
+        const dayTasks = allTasks.filter(t => t.date === dayStr);
+        const hasTasks = dayTasks.length > 0;
         
-        if (tasks.length === 0) {
-            taskList.innerHTML = '<li class="empty">No tasks scheduled for this day</li>';
-        } else {
-            taskList.innerHTML = tasks.map(task => `
-                <li class="${task.status.toLowerCase()}">
-                    <div class="task-header">
-                        <span class="task-icon">${getStatusIcon(task.status)}</span>
-                        <span class="task-title">${task.task}</span>
-                        <span class="task-status ${task.status.toLowerCase()}">${task.status}</span>
-                    </div>
-                    <div class="task-details">
-                        ${task.remarks ? `
-                        <div class="task-detail-row">
-                            <span class="task-detail-label">Remarks:</span>
-                            <span class="task-detail-value">${task.remarks}</span>
-                        </div>` : ''}
-                        
-                        ${task.verifier ? `
-                        <div class="task-detail-row">
-                            <span class="task-detail-label">Verifier:</span>
-                            <span class="task-detail-value">${task.verifier}</span>
-                        </div>` : ''}
-                        
-                        ${task.verifierRemarks ? `
-                        <div class="task-detail-row">
-                            <span class="task-detail-label">Verifier Remarks:</span>
-                            <span class="task-detail-value">${task.verifierRemarks}</span>
-                        </div>` : ''}
-                        
-                        ${task.verifiedStatus ? `
-                        <div class="task-detail-row">
-                            <span class="task-detail-label">Verified Status:</span>
-                            <span class="task-detail-value">
-                                <span class="task-status ${task.verifiedStatus.toLowerCase()}">
-                                    ${task.verifiedStatus}
-                                </span>
+        // Check if any task is a leave
+        const isLeave = dayTasks.some(t => t.task.toUpperCase() === 'LEAVE');
+        const isHoliday = dayTasks.some(t => t.task.toUpperCase() === 'HOLIDAY');
+        const isToday = (year === currentYear && selectedMonth === currentMonth && day === currentDay);
+
+        const dayDiv = document.createElement("div");
+        dayDiv.className = `day ${hasTasks && !isLeave && !isHoliday ? "has-task" : ""} ${isToday ? "today" : ""} ${dayOfWeek === 0 ? "sunday" : ""} ${isLeave ? "leave" : ""} ${isHoliday ? "holiday" : ""}`;
+        dayDiv.textContent = day;
+        dayDiv.onclick = () => showTasks(dayStr, day, selectedMonth, year);
+        
+        calendarContainer.appendChild(dayDiv);
+    }
+}
+function showTasks(date, day, month, year) {
+    const modal = document.getElementById("taskModal");
+    const taskList = document.getElementById("taskList");
+    const modalDateTitle = document.getElementById("modalDateTitle");
+
+    const dateObj = new Date(year, month, day);
+    const formattedDate = dateObj.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        month: 'long', 
+        day: 'numeric', 
+        year: 'numeric' 
+    });
+    
+    modalDateTitle.textContent = `Tasks for ${formattedDate}`;
+
+    const tasks = allTasks.filter(t => t.date === date);
+    
+    // Check if any task is a LEAVE
+    const hasLeave = tasks.some(t => t.task.toUpperCase() === 'LEAVE');
+     const hasHoliday = tasks.some(t => t.task.toUpperCase() === 'HOLIDAY');
+    
+    if (hasLeave) {
+        taskList.innerHTML = '<li class="empty">ON LEAVE</li>';
+    }else if (hasHoliday) {
+        taskList.innerHTML = '<li class="empty">HOLIDAY</li>';
+    } 
+    else if (tasks.length === 0) {
+        taskList.innerHTML = '<li class="empty">No tasks scheduled for this day</li>';
+    } else {
+        taskList.innerHTML = tasks.map(task => `
+            <li class="${task.status.toLowerCase()}">
+                <div class="task-header">
+                    <span class="task-icon">${getStatusIcon(task.status)}</span>
+                    <span class="task-title">${task.task}</span>
+                    <span class="task-status ${task.status.toLowerCase()}">${task.status}</span>
+                </div>
+                <div class="task-details">
+                    ${task.remarks ? `
+                    <div class="task-detail-row">
+                        <span class="task-detail-label">Remarks:</span>
+                        <span class="task-detail-value">${task.remarks}</span>
+                    </div>` : ''}
+                    
+                    ${task.verifier ? `
+                    <div class="task-detail-row">
+                        <span class="task-detail-label">Verifier:</span>
+                        <span class="task-detail-value">${task.verifier}</span>
+                    </div>` : ''}
+                    
+                    ${task.verifierRemarks ? `
+                    <div class="task-detail-row">
+                        <span class="task-detail-label">Verifier Remarks:</span>
+                        <span class="task-detail-value">${task.verifierRemarks}</span>
+                    </div>` : ''}
+                    
+                    ${task.verifiedStatus ? `
+                    <div class="task-detail-row">
+                        <span class="task-detail-label">Verified Status:</span>
+                        <span class="task-detail-value">
+                            <span class="task-status ${task.verifiedStatus.toLowerCase()}">
+                                ${task.verifiedStatus}
                             </span>
-                        </div>` : ''}
-                    </div>
-                </li>
-            `).join('');
-        }
-
-        modal.style.display = "block";
-        document.getElementById("overlay").style.display = "block";
+                        </span>
+                    </div>` : ''}
+                </div>
+            </li>
+        `).join('');
     }
 
+    modal.style.display = "block";
+    document.getElementById("overlay").style.display = "block";
+}
     function getStatusIcon(status) {
         switch(status.toLowerCase()) {
             case 'completed': return '✅';
